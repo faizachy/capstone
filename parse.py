@@ -1,3 +1,6 @@
+#!/usr/bin/env pvpython
+from paraview.simple import *
+
 def convert_value(e):
     try:
         return int(e)
@@ -44,4 +47,20 @@ if __name__=="__main__":
         print("usage: python parse.py <file>")
         exit(1)
     res=get_file_data(argv[1])
-    print(res)
+    #print(res)
+
+    pos_type, pos_vals = res["Problem ID: 1"]["Mesh node coordinates for Entire model"]
+
+    # get active view
+    renderView1 = GetActiveViewOrCreate('RenderView')
+    renderView1.ViewSize = [1670, 1091]
+
+    for pos in pos_vals[:300]:
+    
+        # Lets create a sphere
+        sphere=Sphere(Radius = 0.1, Center = pos[1:])
+        Show(sphere)
+
+    # save screenshot
+    Render()
+    SaveScreenshot('greenSphereScreenshot.png', renderView1,ImageResolution=[1670, 1091])
