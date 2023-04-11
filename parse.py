@@ -1,5 +1,6 @@
 #!/usr/bin/env pvpython
-from paraview.simple import *
+#from paraview.simple import *
+from math import sqrt
 import vtk
 
 def convert_value(e):
@@ -59,11 +60,37 @@ if __name__=="__main__":
     print(pos_type)
     fac_type, fac_vals = res["Problem ID: 1"]["Element mesh node connectivity for Entire model"]
     print(fac_type)
+    mag_type, mag_vals = res["Problem ID: 1"]["B values for Entire model"]
+    print(mag_type)
+
+    point_fields = {}
+    
+    for field in mag_vals:
+        face = fac_vals[field[0] - 1]
+        for i in range(0, 4):
+            node = face[1 + i]
+            node_b = tuple(field[1 + i : : 4])
+            if node not in point_fields:
+                point_fields[node] = [node_b]
+            else:
+                point_fields[node].append(node_b)
+    print(point_fields)
 
     vtk_points = vtk.vtkPoints()
     vtk_faces = vtk.vtkCellArray()
+    vtk_b_mag = vtk.vtkFloatArray()
+    vtk_b_mag.SetName("B field Magnitude")
     for pos in pos_vals:
         vtk_points.InsertNextPoint(pos[1:])
+        fields = point_fields[pos[0]]
+        f_x,f_y,f_z = 0,0,0
+        for f in fields:
+            f_x += f[0]
+            f_y += f[1]
+            f_z += f[2]
+        field = tuple(x / len(fields) for x in (f_x,f_y,f_z))
+        field_mag = sqrt(sum(x * x for x in field))
+        vtk_b_mag.InsertNextTuple1(field_mag)
     
     faces = set()
     for f_val in fac_vals:
@@ -83,6 +110,8 @@ if __name__=="__main__":
     vtk_data = vtk.vtkPolyData()
     vtk_data.SetPoints(vtk_points)
     vtk_data.SetPolys(vtk_faces)
+    vtk_data.GetPointData().AddArray(vtk_b_mag)
+    
 
     writer = vtk.vtkXMLPolyDataWriter()
     writer.SetFileName('model_out.vtp')
