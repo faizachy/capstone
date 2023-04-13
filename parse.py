@@ -88,7 +88,7 @@ if __name__=="__main__":
             f_x += f[0]
             f_y += f[1]
             f_z += f[2]
-        field = tuple(x / len(fields) for x in (f_x,f_y,f_z))
+        field = tuple(x for x in (f_x,f_y,f_z))
         field_mag = sqrt(sum(x * x for x in field))
         vtk_b_mag.InsertNextTuple1(field_mag)
     
