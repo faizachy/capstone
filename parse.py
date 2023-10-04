@@ -16,41 +16,43 @@ def convert_value(e):
             return e
 
 # Define a function to parse data from a file and organize it into a dictionary.
-def get_file_data(filename):
+def get_file_data(filenames):
     res = {}
-    curproblem = ""
-    cur = ""
-    types = None
-    values = []
-    with open(filename, "r") as f:
-        for ln in f:
-            elems = tuple(e.strip(" \n\t") for e in ln.split(",") if e.strip(" \n\t") != "")
-            if len(elems) == 1:
-                if cur != None:
-                    if types != None:
-                        res[curproblem][cur] = (types, values)
-                        values = []
-                        types = None
-                    curproblem = elems[0]
-                    if curproblem not in res:
-                        res[curproblem] = {}
-                    cur = None
+    for filename in filenames:
+        curproblem = ""
+        cur = ""
+        types = None
+        values = []
+        with open(filename, "r") as f:
+            for ln in f:
+                elems = tuple(e.strip(" \n\t") for e in ln.split(",") if e.strip(" \n\t") != "")
+                if len(elems) == 1:
+                    if cur != None:
+                        if types != None:
+                            res[curproblem][cur] = (types, values)
+                            values = []
+                            types = None
+                        curproblem = elems[0]
+                        if curproblem not in res:
+                            res[curproblem] = {}
+                        cur = None
+                    else:
+                        cur = elems[0]
+                elif types == None:
+                    types = elems
                 else:
-                    cur = elems[0]
-            elif types == None:
-                types = elems
-            else:
-                values.append(tuple(convert_value(e) for e in elems)) # Note: node numbers are 1-indexed, so will need to offset
-    if types != None:
-        res[curproblem][cur] = (types, values)
+                    values.append(tuple(convert_value(e) for e in elems)) # Note: node numbers are 1-indexed, so will need to offset
+        if types != None:
+            res[curproblem][cur] = (types, values)
+    print(res.keys())
     return res
 
 # Define a function to add an outside face to a set, ensuring no duplicates.
-def add_outside_face(face_set, f):
+def add_outside_face(face_set, f, mass):
     if f in face_set:
-        face_set.remove(f)
+        face_set[f] = max(mass, face_set[f])
     else:
-        face_set.add(f)
+        face_set[f] = mass
 
 # Entry point of the script
 if __name__ == "__main__":
@@ -59,9 +61,11 @@ if __name__ == "__main__":
     if len(argv) < 2:
         print("usage: python parse.py <file>")
         exit(1)
-    res = get_file_data(argv[1])
+    res = get_file_data(argv[1:])
     print(res["Problem ID: 1"].keys())
 
+    if "Problem ID: 1" not in res:
+        raise "Error: Files did not have a valid problem ID"
     # Extract mesh node coordinates, element connectivity, and B values from the parsed data.
     pos_type, pos_vals = res["Problem ID: 1"]["Mesh node coordinates for Entire model"]
     print(pos_type)
@@ -72,6 +76,8 @@ if __name__ == "__main__":
     # Extract E field values for Entire model at time t = 0 ms
     e_type, e_vals = res["Problem ID: 1"]["E values for Entire model"]
     print(e_type)
+    mas_type, mas_vals = res["Problem ID: 1"]["Mass density values for Entire model"]
+    print(mas_type)
 
     # Create a dictionary to store point fields.
     b_point_fields = {}
@@ -86,7 +92,7 @@ if __name__ == "__main__":
                 b_point_fields[node] = [node_b]
             else:
                 b_point_fields[node].append(node_b)
-    print(b_point_fields)
+    #print(b_point_fields)
 
     # Create a dictionary to store E field values for each node.
     e_point_fields = {}
@@ -101,7 +107,7 @@ if __name__ == "__main__":
                 e_point_fields[node] = [node_e]
             else:
                 e_point_fields[node].append(node_e)
-    print(e_point_fields)
+    #print(e_point_fields)
 
     # Create VTK data structures to store the mesh and B field magnitude.
     vtk_points = vtk.vtkPoints()
@@ -110,6 +116,8 @@ if __name__ == "__main__":
     vtk_b_mag.SetName("B field Magnitude")
     vtk_e_mag = vtk.vtkFloatArray()
     vtk_e_mag.SetName("E field Magnitude")
+    vtk_mass_mag = vtk.vtkFloatArray()
+    vtk_mass_mag.SetName("Mass density Magnitude")
 
     # Populate VTK data structures with mesh node coordinates and computed B field magnitudes.
     for pos in pos_vals:
@@ -134,22 +142,33 @@ if __name__ == "__main__":
         field_mag = sqrt(sum(x * x for x in (e_x, e_y, e_z)))
         vtk_e_mag.InsertNextTuple1(field_mag)
 
+    face_masses = {}
+    # Get mass densities of points
+    for field in mas_vals:
+        face = field[0] - 1
+        face_mass = sum(field[1:])
+        face_masses[face] = face_mass
+
     # Create faces set to keep track of unique faces.
-    faces = set()
+    faces = {}
     for f_val in fac_vals:
+        mass = face_masses[f_val[0] - 1]
+        if mass < 5.0: # Don't add air to mesh
+            continue
         f = tuple(sorted(f_val[1:]))
-        add_outside_face(faces, (f[0], f[1], f[2]))
-        add_outside_face(faces, (f[0], f[1], f[3]))
-        add_outside_face(faces, (f[0], f[2], f[3]))
-        add_outside_face(faces, (f[1], f[2], f[3]))
+        add_outside_face(faces, (f[0], f[1], f[2]), mass)
+        add_outside_face(faces, (f[0], f[1], f[3]), mass)
+        add_outside_face(faces, (f[0], f[2], f[3]), mass)
+        add_outside_face(faces, (f[1], f[2], f[3]), mass)
 
     # Create VTK triangle cells from the faces set.
-    for face in faces:
+    for (face, mass) in faces.items():
         vtk_face = vtk.vtkTriangle()
         ids = vtk_face.GetPointIds()
         for i, node in enumerate(face):
             ids.SetId(i, node - 1)  # Because magnet export is 1-indexed
         vtk_faces.InsertNextCell(vtk_face)
+        vtk_mass_mag.InsertNextTuple1(mass)
 
     # Create VTK polydata and add point and cell data.
     vtk_data = vtk.vtkPolyData()
@@ -157,6 +176,7 @@ if __name__ == "__main__":
     vtk_data.SetPolys(vtk_faces)
     vtk_data.GetPointData().AddArray(vtk_b_mag)
     vtk_data.GetPointData().AddArray(vtk_e_mag)
+    vtk_data.GetCellData().AddArray(vtk_mass_mag)
 
     # Write the VTK polydata to a file.
     writer = vtk.vtkXMLPolyDataWriter()
