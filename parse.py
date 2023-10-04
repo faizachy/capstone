@@ -112,10 +112,18 @@ if __name__ == "__main__":
     # Create VTK data structures to store the mesh and B field magnitude.
     vtk_points = vtk.vtkPoints()
     vtk_faces = vtk.vtkCellArray()
-    vtk_b_mag = vtk.vtkFloatArray()
-    vtk_b_mag.SetName("B field Magnitude")
-    vtk_e_mag = vtk.vtkFloatArray()
-    vtk_e_mag.SetName("E field Magnitude")
+    vtk_b = vtk.vtkFloatArray()
+    vtk_b.SetNumberOfComponents(3)
+    vtk_b.SetName("B field Vectors")
+    vtk_e = vtk.vtkFloatArray()
+    vtk_e.SetNumberOfComponents(3)
+    vtk_e.SetName("E field Vectors")
+
+    # vtk_b_mag = vtk.vtkFloatArray()
+    # vtk_b_mag.SetName("B field Magnitude")
+    # vtk_e_mag = vtk.vtkFloatArray()
+    # vtk_e_mag.SetName("E field Magnitude")
+
     vtk_mass_mag = vtk.vtkFloatArray()
     vtk_mass_mag.SetName("Mass density Magnitude")
 
@@ -128,8 +136,9 @@ if __name__ == "__main__":
             f_x += f[0]
             f_y += f[1]
             f_z += f[2]
-        field_mag = sqrt(sum(x * x for x in (f_x, f_y, f_z)))
-        vtk_b_mag.InsertNextTuple1(field_mag)
+        # field_mag = sqrt(sum(x * x for x in (f_x, f_y, f_z)))
+        # vtk_b_mag.InsertNextTuple1(field_mag)
+        vtk_b.InsertNextTuple3(f_x, f_y, f_z)
 
     # Populate VTK data structures with E field magnitudes.
     for pos in pos_vals:
@@ -139,8 +148,9 @@ if __name__ == "__main__":
             e_x += f[0]
             e_y += f[1]
             e_z += f[2]
-        field_mag = sqrt(sum(x * x for x in (e_x, e_y, e_z)))
-        vtk_e_mag.InsertNextTuple1(field_mag)
+        #field_mag = sqrt(sum(x * x for x in (e_x, e_y, e_z)))
+        #vtk_e_mag.InsertNextTuple1(field_mag)
+        vtk_e.InsertNextTuple3(e_x, e_y, e_z)
 
     face_masses = {}
     # Get mass densities of points
@@ -174,8 +184,10 @@ if __name__ == "__main__":
     vtk_data = vtk.vtkPolyData()
     vtk_data.SetPoints(vtk_points)
     vtk_data.SetPolys(vtk_faces)
-    vtk_data.GetPointData().AddArray(vtk_b_mag)
-    vtk_data.GetPointData().AddArray(vtk_e_mag)
+    # vtk_data.GetPointData().AddArray(vtk_b_mag)
+    # vtk_data.GetPointData().AddArray(vtk_e_mag)
+    vtk_data.GetPointData().AddArray(vtk_b)
+    vtk_data.GetPointData().AddArray(vtk_e)
     vtk_data.GetCellData().AddArray(vtk_mass_mag)
 
     # Write the VTK polydata to a file.
