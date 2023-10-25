@@ -72,103 +72,108 @@ if __name__ == "__main__":
     if "Problem ID: 1" not in res:
         raise "Error: Files did not have a valid problem ID"
     # Extract mesh node coordinates, element connectivity, and B values from the parsed data.
+    hasbfield = "B values for Entire model" in res["Problem ID: 1"]
+    hasefield = "E values for Entire model" in res["Problem ID: 1"]
+    hasmass = "Mass density values for Entire model" in res["Problem ID: 1"]
+
     pos_type, pos_vals = res["Problem ID: 1"]["Mesh node coordinates for Entire model"]
     print(pos_type)
     fac_type, fac_vals = res["Problem ID: 1"]["Element mesh node connectivity for Entire model"]
     print(fac_type)
-    mag_type, mag_vals = res["Problem ID: 1"]["B values for Entire model"]
-    print(mag_type)
-    # Extract E field values for Entire model at time t = 0 ms
-    e_type, e_vals = res["Problem ID: 1"]["E values for Entire model"]
-    print(e_type)
-    mas_type, mas_vals = res["Problem ID: 1"]["Mass density values for Entire model"]
-    print(mas_type)
-
-    # Create a dictionary to store point fields.
-    b_point_fields = {}
-
-    # Process and store B values for each node.
-    for field in mag_vals:
-        face = fac_vals[field[0] - 1]
-        for i in range(0, 4):
-            node = face[1 + i]
-            node_b = tuple(field[1 + i : : 4])
-            if node not in b_point_fields:
-                b_point_fields[node] = [node_b]
-            else:
-                b_point_fields[node].append(node_b)
-    #print(b_point_fields)
-
-    # Create a dictionary to store E field values for each node.
-    e_point_fields = {}
-
-    # Process and store E field values for each node.
-    for field in e_vals:
-        face = fac_vals[field[0] - 1]
-        for i in range(0, 4):
-            node = face[1 + i]
-            node_e = tuple(field[1 + i : : 4])
-            if node not in e_point_fields:
-                e_point_fields[node] = [node_e]
-            else:
-                e_point_fields[node].append(node_e)
-    #print(e_point_fields)
 
     # Create VTK data structures to store the mesh and B field magnitude.
     vtk_points = vtk.vtkPoints()
     vtk_faces = vtk.vtkCellArray()
+
     vtk_b = vtk.vtkFloatArray()
     vtk_b.SetNumberOfComponents(3)
     vtk_b.SetName("B field Vectors")
+    # vtk_b_mag = vtk.vtkFloatArray()
+    # vtk_b_mag.SetName("B field Magnitude")
+
+    if hasbfield:
+        mag_type, mag_vals = res["Problem ID: 1"]["B values for Entire model"]
+        print(mag_type)
+        # Create a dictionary to store point fields.
+        b_point_fields = {}
+        # Process and store B values for each node.
+        for field in mag_vals:
+            face = fac_vals[field[0] - 1]
+            for i in range(0, 4):
+                node = face[1 + i]
+                node_b = tuple(field[1 + i : : 4])
+                if node not in b_point_fields:
+                    b_point_fields[node] = [node_b]
+                else:
+                    b_point_fields[node].append(node_b)
+        #print(b_point_fields)
+        # Populate VTK data structures with mesh node coordinates and computed B field magnitudes.
+        for pos in pos_vals:
+            vtk_points.InsertNextPoint(pos[1:])
+            fields = b_point_fields[pos[0]]
+            f_x, f_y, f_z = 0, 0, 0
+            for f in fields:
+                f_x += f[0]
+                f_y += f[1]
+                f_z += f[2]
+            # field_mag = sqrt(sum(x * x for x in (f_x, f_y, f_z)))
+            # vtk_b_mag.InsertNextTuple1(field_mag)
+            vtk_b.InsertNextTuple3(f_x, f_y, f_z)
+
     vtk_e = vtk.vtkFloatArray()
     vtk_e.SetNumberOfComponents(3)
     vtk_e.SetName("E field Vectors")
-
-    # vtk_b_mag = vtk.vtkFloatArray()
-    # vtk_b_mag.SetName("B field Magnitude")
     # vtk_e_mag = vtk.vtkFloatArray()
     # vtk_e_mag.SetName("E field Magnitude")
+
+    if hasefield:
+        # Extract E field values for Entire model at time t = 0 ms
+        e_type, e_vals = res["Problem ID: 1"]["E values for Entire model"]
+        print(e_type)
+        # Create a dictionary to store E field values for each node.
+        e_point_fields = {}
+        # Process and store E field values for each node.
+        for field in e_vals:
+            face = fac_vals[field[0] - 1]
+            for i in range(0, 4):
+                node = face[1 + i]
+                node_e = tuple(field[1 + i : : 4])
+                if node not in e_point_fields:
+                    e_point_fields[node] = [node_e]
+                else:
+                    e_point_fields[node].append(node_e)
+        #print(e_point_fields)
+        # Populate VTK data structures with E field magnitudes.
+        for pos in pos_vals:
+            fields = e_point_fields.get(pos[0], [])  # Get E field values for the current node (if available)
+            e_x, e_y, e_z = 0, 0, 0
+            for f in fields:
+                e_x += f[0]
+                e_y += f[1]
+                e_z += f[2]
+            #field_mag = sqrt(sum(x * x for x in (e_x, e_y, e_z)))
+            #vtk_e_mag.InsertNextTuple1(field_mag)
+            vtk_e.InsertNextTuple3(e_x, e_y, e_z)
+
 
     vtk_mass_mag = vtk.vtkFloatArray()
     vtk_mass_mag.SetName("Mass density Magnitude")
 
-    # Populate VTK data structures with mesh node coordinates and computed B field magnitudes.
-    for pos in pos_vals:
-        vtk_points.InsertNextPoint(pos[1:])
-        fields = b_point_fields[pos[0]]
-        f_x, f_y, f_z = 0, 0, 0
-        for f in fields:
-            f_x += f[0]
-            f_y += f[1]
-            f_z += f[2]
-        # field_mag = sqrt(sum(x * x for x in (f_x, f_y, f_z)))
-        # vtk_b_mag.InsertNextTuple1(field_mag)
-        vtk_b.InsertNextTuple3(f_x, f_y, f_z)
-
-    # Populate VTK data structures with E field magnitudes.
-    for pos in pos_vals:
-        fields = e_point_fields.get(pos[0], [])  # Get E field values for the current node (if available)
-        e_x, e_y, e_z = 0, 0, 0
-        for f in fields:
-            e_x += f[0]
-            e_y += f[1]
-            e_z += f[2]
-        #field_mag = sqrt(sum(x * x for x in (e_x, e_y, e_z)))
-        #vtk_e_mag.InsertNextTuple1(field_mag)
-        vtk_e.InsertNextTuple3(e_x, e_y, e_z)
-
     face_masses = {}
     # Get mass densities of points
-    for field in mas_vals:
-        face = field[0] - 1
-        face_mass = sum(field[1:])
-        face_masses[face] = face_mass
+    if hasmass:
+        mas_type, mas_vals = res["Problem ID: 1"]["Mass density values for Entire model"]
+        print(mas_type)
+        for field in mas_vals:
+            face = field[0] - 1
+            face_mass = sum(field[1:])
+            face_masses[face] = face_mass
 
     # Create faces set to keep track of unique faces.
     faces = {}
     for f_val in fac_vals:
-        mass = face_masses[f_val[0] - 1]
-        if mass < 5.0: # Don't add air to mesh
+        mass = face_masses[f_val[0] - 1] if hasmass else 5.0
+        if hasmass and mass < 5.0: # Don't add air to mesh
             continue
         f = tuple(sorted(f_val[1:]))
         add_outside_face(faces, (f[0], f[1], f[2]), mass)
@@ -189,11 +194,14 @@ if __name__ == "__main__":
     vtk_data = vtk.vtkPolyData()
     vtk_data.SetPoints(vtk_points)
     vtk_data.SetPolys(vtk_faces)
-    # vtk_data.GetPointData().AddArray(vtk_b_mag)
-    # vtk_data.GetPointData().AddArray(vtk_e_mag)
-    vtk_data.GetPointData().AddArray(vtk_b)
-    vtk_data.GetPointData().AddArray(vtk_e)
-    vtk_data.GetCellData().AddArray(vtk_mass_mag)
+    if hasbfield:
+        vtk_data.GetPointData().AddArray(vtk_b)
+        # vtk_data.GetPointData().AddArray(vtk_b_mag)
+    if hasefield:
+        vtk_data.GetPointData().AddArray(vtk_e)
+        # vtk_data.GetPointData().AddArray(vtk_e_mag)
+    if hasmass:
+        vtk_data.GetCellData().AddArray(vtk_mass_mag)
 
     # Write the VTK polydata to a file.
     writer = vtk.vtkXMLPolyDataWriter()
