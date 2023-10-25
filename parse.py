@@ -109,7 +109,6 @@ if __name__ == "__main__":
         #print(b_point_fields)
         # Populate VTK data structures with mesh node coordinates and computed B field magnitudes.
         for pos in pos_vals:
-            vtk_points.InsertNextPoint(pos[1:])
             fields = b_point_fields[pos[0]]
             f_x, f_y, f_z = 0, 0, 0
             for f in fields:
@@ -182,13 +181,16 @@ if __name__ == "__main__":
         add_outside_face(faces, (f[1], f[2], f[3]), mass)
 
     # Create VTK triangle cells from the faces set.
+    for pos in pos_vals:
+        vtk_points.InsertNextPoint(pos[1:])
     for (face, mass) in faces.items():
         vtk_face = vtk.vtkTriangle()
         ids = vtk_face.GetPointIds()
         for i, node in enumerate(face):
             ids.SetId(i, node - 1)  # Because magnet export is 1-indexed
         vtk_faces.InsertNextCell(vtk_face)
-        vtk_mass_mag.InsertNextTuple1(mass)
+        if hasmass:
+            vtk_mass_mag.InsertNextTuple1(mass)
 
     # Create VTK polydata and add point and cell data.
     vtk_data = vtk.vtkPolyData()
