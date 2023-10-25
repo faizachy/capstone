@@ -3,6 +3,7 @@
 
 #from paraview.simple import *
 from math import sqrt
+from glob import glob
 import vtk
 
 # Define a function to convert a value to an integer or a float, or leave it as is.
@@ -18,6 +19,8 @@ def convert_value(e):
 # Define a function to parse data from a file and organize it into a dictionary.
 def get_file_data(filenames):
     res = {}
+    filenames = set(sum((glob(x) for x in filenames), []))
+    print("opening:", filenames)
     for filename in filenames:
         curproblem = ""
         cur = ""
@@ -57,6 +60,8 @@ def add_outside_face(face_set, f, mass):
 # Entry point of the script
 if __name__ == "__main__":
     from sys import argv
+
+    print("pvpython loaded...")
 
     if len(argv) < 2:
         print("usage: python parse.py <file>")
