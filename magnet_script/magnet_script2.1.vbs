@@ -1,7 +1,7 @@
 
 Call SetLocale("en-us")
-
-CALL openDocument("C:\Users\tduran2\Desktop\BLDC tutorial\MotorsolveBLDC_12slots4poles_WORKS.mn")
+'DO NOT TOUCH THE ORDER OF LINE 4: because we are hard coding line 4
+CALL openDocument("C:\Users\fchu6\Desktop\BLDC12slot1layer4pole_success1.mn")
 Set Doc = getDocument()
 Set Sol= Doc.getSolution()
 Fields= Doc.getFields()
@@ -13,11 +13,11 @@ Set field_mass=Sol.getSystemField(mesh, "Mass density")
 
 Dim fso, csvFileName1, csvFileName2, csvFileName3, csvFileName3_mass_density
 Set fso = CreateObject("Scripting.FileSystemObject")
-csvFileName1 = "C:\Users\tduran2\Desktop\fieldscoordinates.csv"
-csvFileName2 = "C:\Users\tduran2\Desktop\fieldsconnectivity.csv"
-csvFileName3_B = "C:\Users\tduran2\Desktop\B_fields.csv"
-csvFileName3_E = "C:\Users\tduran2\Desktop\E_fields.csv"
-csvFileName3_mass_density = "C:\Users\tduran2\Desktop\mass_density.csv"
+csvFileName1 = "C:\Users\fchu6\Desktop\fieldscoordinates.csv"
+csvFileName2 = "C:\Users\fchu6\Desktop\fieldsconnectivity.csv"
+csvFileName3_B = "C:\Users\fchu6\Desktop\B_fields.csv"
+csvFileName3_E = "C:\Users\fchu6\Desktop\E_fields.csv"
+csvFileName3_mass_density = "C:\Users\fchu6\Desktop\mass_density.csv"
 
 Set csvFile1 = fso.CreateTextFile(csvFileName1,True)
 Set csvFile2 = fso.CreateTextFile(csvFileName2,True)
