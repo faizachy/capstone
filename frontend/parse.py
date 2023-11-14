@@ -4,6 +4,7 @@
 #from paraview.simple import *
 from math import sqrt
 from glob import glob
+from sys import argv
 import vtk
 
 # Define a function to convert a value to an integer or a float, or leave it as is.
@@ -58,15 +59,14 @@ def add_outside_face(face_set, f, mass):
         face_set[f] = mass
 
 # Entry point of the script
-if __name__ == "__main__":
-    from sys import argv
-
+def main():
     print("pvpython loaded...")
 
     if len(argv) < 2:
         print("usage: python parse.py <file>")
         exit(1)
     res = get_file_data(argv[1:])
+    print("files red sucessfully")
     print(res["Problem ID: 1"].keys())
 
     if "Problem ID: 1" not in res:
@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     vtk_mass_mag = vtk.vtkFloatArray()
     vtk_mass_mag.SetName("Mass density Magnitude")
-
+    print("building connectivity")
     face_masses = {}
     # Get mass densities of points
     if hasmass:
@@ -191,7 +191,7 @@ if __name__ == "__main__":
         vtk_faces.InsertNextCell(vtk_face)
         if hasmass:
             vtk_mass_mag.InsertNextTuple1(mass)
-
+    print("writing vtk...")
     # Create VTK polydata and add point and cell data.
     vtk_data = vtk.vtkPolyData()
     vtk_data.SetPoints(vtk_points)
@@ -207,6 +207,8 @@ if __name__ == "__main__":
 
     # Write the VTK polydata to a file.
     writer = vtk.vtkXMLPolyDataWriter()
-    writer.SetFileName('model_out.vtp')
+    writer.SetFileName('output/model_out.vtp')
     writer.SetInputData(vtk_data)
     writer.Write()
+
+main()
