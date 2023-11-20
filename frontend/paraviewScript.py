@@ -384,7 +384,7 @@ Render()  # Render the scene
 
 # --------------------------------------------
 # Set the output file path
-output_file_path = "/Users/johantrippitelli/Desktop/image.png"  # You can change this to your desired output path and file name
+output_file_path = "output/image.png"  # You can change this to your desired output path and file name
 
 # Save screenshot
 SaveScreenshot(
@@ -397,5 +397,5 @@ SaveScreenshot(
     CompressionLevel="5",
 )  # Compression level is optional and for formats that support it like png
 # uncomment the following to render all views
-# RenderAllViews()
+RenderAllViews()
 # alternatively, if you want to write images, you can use SaveScreenshot(...).
