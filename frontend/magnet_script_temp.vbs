@@ -1,7 +1,7 @@
 
 Call SetLocale("en-us")
 'DO NOT TOUCH THE ORDER OF LINE 4: because we are hard coding line 4
-CALL openDocument("???\BLDC12slot1layer4pole_success1.mn")
+CALL openDocument("C:/Users/fchu6/Desktop/BLDC12slot1layer4pole_success1.mn")
 Set Doc = getDocument()
 Set Sol= Doc.getSolution()
 Fields= Doc.getFields()

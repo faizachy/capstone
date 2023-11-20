@@ -4,7 +4,7 @@ import subprocess
 import PySimpleGUI as sg
 
 import magnet
-import paraview
+import calling_paraview
 
 sg.theme('GreenTan')
 
@@ -32,8 +32,9 @@ def main():
             sg.popup("Loading vizualisation of the ", values["field"], " in the Omniverse")
             magnet.set_filename(values["file"])
             magnet.run_script()
-            paraview.run_script()
+            calling_paraview.run_parser()
             print("paraview parsing done")
+            calling_paraview.run_displayer("B")
             break
         if event == 'Exit':
             break

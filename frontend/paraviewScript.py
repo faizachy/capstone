@@ -14,7 +14,7 @@ from paraview.simple import *
 
 # Check if the required number of arguments is present (including the script name)
 if len(sys.argv) < 3:
-    print("Usage: pvpython paraviewScript.py variable1 variable2")
+    print("Usage: pvpython paraviewScript.py fileName fieldType")
     sys.exit(1)
 
 # Assign the arguments to variables
