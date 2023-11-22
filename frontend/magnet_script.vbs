@@ -9,7 +9,18 @@ Fields= Doc.getFields()
 Dim arr_time
 arr_time = Array(1,1)
 
-Set mesh=Sol.getMesh(1)
+' Testing push
+
+SolType = Sol.getSolutionType()
+If (SolType = "TransientMagnetic") Then
+    arr_type = Array(1,1)
+ElseIf (SolType = "StaticMagnetic") Then
+    arr_type = 1
+Else
+    'Figure something out for this, maybe error handling code'
+    arr_type = 1
+
+Set mesh=Sol.getMesh(arr_type)
 Set field=Sol.getSystemField(mesh, "B")
 Set field_B=Sol.getSystemField(mesh, "B")
 Set field_E=Sol.getSystemField(mesh, "E")
