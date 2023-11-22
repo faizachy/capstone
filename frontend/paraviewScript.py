@@ -10,6 +10,8 @@ from paraview.simple import *
 
 #### disable automatic camera reset on 'Show'
 
+SCREENSHOT = True
+
 # Variable to determine which field to display
 
 # Check if the required number of arguments is present (including the script name)
@@ -383,19 +385,19 @@ renderView1.ResetCamera()  # Reset the camera to view all data
 Render()  # Render the scene
 
 # --------------------------------------------
-# Set the output file path
-output_file_path = "output/image.png"  # You can change this to your desired output path and file name
+if SCREENSHOT == True:
+    # Set the output file path
+    output_file_path = "output/image.png"  # You can change this to your desired output path and file name
 
-# Save screenshot
-SaveScreenshot(
-    output_file_path,
-    renderView1,
-    ImageResolution=[1920, 1080],
-    OverrideColorPalette="",
-    StereoMode="No change",
-    TransparentBackground=False,
-    CompressionLevel="5",
-)  # Compression level is optional and for formats that support it like png
-# uncomment the following to render all views
+    # Save screenshot
+    SaveScreenshot(
+        output_file_path,
+        renderView1,
+        ImageResolution=[1920, 1080],
+        OverrideColorPalette="",
+        StereoMode="No change",
+        TransparentBackground=False,
+        CompressionLevel="5",
+    )  # Compression level is optional and for formats that support it like png
+
 RenderAllViews()
-# alternatively, if you want to write images, you can use SaveScreenshot(...).
