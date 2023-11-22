@@ -9,32 +9,32 @@ import calling_paraview
 sg.theme('GreenTan')
 
 def main():
-    l = ["magnetic field", "electric field", "material view"]
     layout = [
         [sg.Text('Choose a solved .mn file', font=('Helvetica', 16))],
         [sg.FileBrowse(key="file")],
         [sg.Text('Selection of fields to display in Omniverse', font=('Helvetica', 16))],
-        [sg.DD(l,size=(70,70),default_value="Choose field to display", key="field")],
-        [sg.Text('Select field vizualisation type ', font=('Helvetica', 16))],
-        [sg.Radio('Arrows', 'loss', size=(12, 1), key="vector"), sg.Radio('Color', 'loss', size=(12, 1), key="magnitude")],
-        [sg.Text('Select a solution type ', font=('Helvetica', 16))],
-        [sg.Radio('Animation', 'loss', size=(12, 1), key="transient"), sg.Radio('Static', 'loss', size=(12, 1), key="static")],
-        [sg.Button('Apply'), sg.Button('Exit')]
+        [sg.Radio('Magnetic Field', 'loss', size=(12, 1), key="B"), sg.Radio('Electric Field', 'loss', size=(12, 1), key="E")],
+        #[sg.Text('Select a solution type', font=('Helvetica', 16))],
+        #[sg.Radio('Animation', 'loss', size=(12, 1), key="transient"), sg.Radio('Static', 'loss', size=(12, 1), key="static")],
+        [sg.Button('Run Solution'), sg.Button('Exit')]
     ]
 
     window = sg.Window("NVIDA vizualisation app", layout)
     while True:
         event, values = window.read()
-        print(values)
         if event == sg.WIN_CLOSED:
             break
-        if event == 'Apply':
-            sg.popup("Loading vizualisation of the ", values["field"], " in the Omniverse")
+        if event == 'Run Solution':
+            field = "E" if values["E"] else "B"
+            print(f"visualizing {field} field")
+            print("extracting magnet solutions")
             magnet.set_filename(values["file"])
             magnet.run_script()
+            print("magnet extraction done, parsing into paraview")
             calling_paraview.run_parser()
             print("paraview parsing done")
-            calling_paraview.run_displayer("B")
+            calling_paraview.run_displayer("E" if values["E"] else "B")
+            print("display conversion done")
             break
         if event == 'Exit':
             break
