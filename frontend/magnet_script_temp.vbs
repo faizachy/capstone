@@ -1,13 +1,29 @@
 
 Call SetLocale("en-us")
 'DO NOT TOUCH THE ORDER OF LINE 4: because we are hard coding line 4
-CALL openDocument("C:/Users/tduran2/Desktop/Capstone/BLDC_Motors/Scaled_MotorsolveBLDC_12slots4poles_WORKS.mn")
+CALL openDocument("C:/Users/tduran2/Desktop/Capstone/BLDC_Motors/Unscaled_motor_notWorking.mn")
 Set Doc = getDocument()
 Set Sol= Doc.getSolution()
 SolType=Sol.getSolutionType()
 Fields= Doc.getFields()
-Dim arr_time
-arr_time = Array(1,1)
+Dim arr_type
+
+SolType = Sol.getSolutionType()
+If (SolType = "TransientMagnetic") Then
+    arr_type = Array(1,1)
+ElseIf (SolType = "StaticMagnetic") Then
+    arr_type = 1
+Else
+    'Figure something out for this, maybe error handling code'
+    arr_type = 1
+End If
+
+If (mesh.is3DMesh()) Then
+    MsgBox "Hi"
+    csvFile1.WriteLine "is 3d"
+Else 
+    MsgBox "ERROR: User must input a 3D version of the model to vizualize in NVIDIA"
+End if
 
 Set mesh=Sol.getMesh(1)
 Set field=Sol.getSystemField(mesh, "B")
