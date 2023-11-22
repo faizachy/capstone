@@ -1,15 +1,12 @@
 
 Call SetLocale("en-us")
 'DO NOT TOUCH THE ORDER OF LINE 4: because we are hard coding line 4
-CALL openDocument("???\BLDC12slot1layer4pole_success1.mn")
+CALL openDocument("C:\Users\tduran2\Desktop\Capstone\BLDC_Motors\Scaled_MotorsolveBLDC_12slots4poles_WORKS.mn")
 Set Doc = getDocument()
 Set Sol= Doc.getSolution()
 SolType=Sol.getSolutionType()
 Fields= Doc.getFields()
-Dim arr_time
-arr_time = Array(1,1)
-
-' Testing push
+Dim arr_type
 
 SolType = Sol.getSolutionType()
 If (SolType = "TransientMagnetic") Then
@@ -19,8 +16,9 @@ ElseIf (SolType = "StaticMagnetic") Then
 Else
     'Figure something out for this, maybe error handling code'
     arr_type = 1
+End If
 
-Set mesh=Sol.getMesh(arr_type)
+Set mesh=Sol.getMesh(1)
 Set field=Sol.getSystemField(mesh, "B")
 Set field_B=Sol.getSystemField(mesh, "B")
 Set field_E=Sol.getSystemField(mesh, "E")
