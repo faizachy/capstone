@@ -4,7 +4,7 @@ import subprocess
 def set_filename(filename):
     with open('magnet_script.vbs', 'r') as file:
         data = file.readlines()
-    print(data)
+    #print(data)
     file.close()
 
     data[3] = 'CALL openDocument("' + filename + '")\n'
@@ -14,4 +14,4 @@ def set_filename(filename):
     file.close()
 
 def run_script():
-    subprocess.call(["C:\\Program Files\\Siemens\\Simcenter MAGNET 2212.0002\\MagNet.exe", "-RunScriptVisible=magnet_script_temp.vbs"])
+    subprocess.call(["C:\\Program Files\\Siemens\\Simcenter MAGNET 2212.0002\\MagNet.exe", "-RunScriptInvisible=magnet_script_temp.vbs"])
