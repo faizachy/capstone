@@ -9,6 +9,20 @@ import sys
 from paraview.simple import *
 
 #### disable automatic camera reset on 'Show'
+paraview.simple._DisableFirstRenderCameraReset()
+
+# Omniverse Connection
+# get the material library
+materialLibrary1 = GetMaterialLibrary()
+
+# Create a new 'Omniverse Connector'
+omniverseConnector1 = CreateView('OmniConnectRenderView')
+omniverseConnector1.AxesGrid = 'GridAxes3DActor'
+omniverseConnector1.StereoType = 'Crystal Eyes'
+omniverseConnector1.CameraFocalDisk = 1.0
+omniverseConnector1.BackEnd = 'OSPRay raycaster'
+omniverseConnector1.OSPRayMaterialLibrary = materialLibrary1
+
 
 SCREENSHOT = True
 
@@ -31,47 +45,47 @@ else:
     raise ValueError("field variable must be 'E' or 'B'")
 
 # create a new 'XML PolyData Reader'
-model_out2vtp = XMLPolyDataReader(
+model_outvtp = XMLPolyDataReader(
     registrationName="model_out.vtp",
     FileName=[modelPath],
 )
-model_out2vtp.CellArrayStatus = ["Mass density Magnitude"]
-model_out2vtp.PointArrayStatus = ["B field Vectors", "E field Vectors"]
+model_outvtp.CellArrayStatus = ["Mass density Magnitude"]
+model_outvtp.PointArrayStatus = ["B field Vectors", "E field Vectors"]
 
-# Properties modified on model_out2vtp
-model_out2vtp.TimeArray = "None"
+# Properties modified on model_outvtp
+model_outvtp.TimeArray = "None"
 
 # get active view
 renderView1 = GetActiveViewOrCreate("RenderView")
 
 # show data in view
-model_out2vtpDisplay = Show(model_out2vtp, renderView1, "GeometryRepresentation")
+model_outvtpDisplay = Show(model_outvtp, omniverseConnector1, "GeometryRepresentation")
 
 # trace defaults for the display properties.
-model_out2vtpDisplay.Representation = "Surface"
-model_out2vtpDisplay.ColorArrayName = [None, ""]
-model_out2vtpDisplay.SelectTCoordArray = "None"
-model_out2vtpDisplay.SelectNormalArray = "None"
-model_out2vtpDisplay.SelectTangentArray = "None"
-model_out2vtpDisplay.OSPRayScaleArray = field_vectors
-model_out2vtpDisplay.OSPRayScaleFunction = "PiecewiseFunction"
-model_out2vtpDisplay.SelectOrientationVectors = field_vectors
-model_out2vtpDisplay.ScaleFactor = 0.010486000031232835
-model_out2vtpDisplay.SelectScaleArray = field_vectors
-model_out2vtpDisplay.GlyphType = "Arrow"
-model_out2vtpDisplay.GlyphTableIndexArray = field_vectors
-model_out2vtpDisplay.GaussianRadius = 0.0005243000015616417
-model_out2vtpDisplay.SetScaleArray = ["POINTS", field_vectors]
-model_out2vtpDisplay.ScaleTransferFunction = "PiecewiseFunction"
-model_out2vtpDisplay.OpacityArray = ["POINTS", field_vectors]
-model_out2vtpDisplay.OpacityTransferFunction = "PiecewiseFunction"
-model_out2vtpDisplay.DataAxesGrid = "GridAxesRepresentation"
-model_out2vtpDisplay.PolarAxes = "PolarAxesRepresentation"
-model_out2vtpDisplay.SelectInputVectors = ["POINTS", field_vectors]
-model_out2vtpDisplay.WriteLog = ""
+model_outvtpDisplay.Representation = "Surface"
+model_outvtpDisplay.ColorArrayName = [None, ""]
+model_outvtpDisplay.SelectTCoordArray = "None"
+model_outvtpDisplay.SelectNormalArray = "None"
+model_outvtpDisplay.SelectTangentArray = "None"
+model_outvtpDisplay.OSPRayScaleArray = field_vectors
+model_outvtpDisplay.OSPRayScaleFunction = "PiecewiseFunction"
+model_outvtpDisplay.SelectOrientationVectors = field_vectors
+model_outvtpDisplay.ScaleFactor = 0.010486000031232835
+model_outvtpDisplay.SelectScaleArray = field_vectors
+model_outvtpDisplay.GlyphType = "Arrow"
+model_outvtpDisplay.GlyphTableIndexArray = field_vectors
+model_outvtpDisplay.GaussianRadius = 0.0005243000015616417
+model_outvtpDisplay.SetScaleArray = ["POINTS", field_vectors]
+model_outvtpDisplay.ScaleTransferFunction = "PiecewiseFunction"
+model_outvtpDisplay.OpacityArray = ["POINTS", field_vectors]
+model_outvtpDisplay.OpacityTransferFunction = "PiecewiseFunction"
+model_outvtpDisplay.DataAxesGrid = "GridAxesRepresentation"
+model_outvtpDisplay.PolarAxes = "PolarAxesRepresentation"
+model_outvtpDisplay.SelectInputVectors = ["POINTS", field_vectors]
+model_outvtpDisplay.WriteLog = ""
 
 # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
-model_out2vtpDisplay.ScaleTransferFunction.Points = [
+model_outvtpDisplay.ScaleTransferFunction.Points = [
     -61.650726318359375,
     0.0,
     0.5,
@@ -83,7 +97,7 @@ model_out2vtpDisplay.ScaleTransferFunction.Points = [
 ]
 
 # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
-model_out2vtpDisplay.OpacityTransferFunction.Points = [
+model_outvtpDisplay.OpacityTransferFunction.Points = [
     -61.650726318359375,
     0.0,
     0.5,
@@ -104,14 +118,14 @@ materialLibrary1 = GetMaterialLibrary()
 renderView1.Update()
 
 # create a new 'Calculator'
-calculator1 = Calculator(registrationName="Calculator1", Input=model_out2vtp)
+calculator1 = Calculator(registrationName="Calculator1", Input=model_outvtp)
 calculator1.Function = ""
 
 # Properties modified on calculator1
 calculator1.Function = ""
 
 # show data in view
-calculator1Display = Show(calculator1, renderView1, "GeometryRepresentation")
+calculator1Display = Show(calculator1, omniverseConnector1, "GeometryRepresentation")
 
 # trace defaults for the display properties.
 calculator1Display.Representation = "Surface"
@@ -161,7 +175,7 @@ calculator1Display.OpacityTransferFunction.Points = [
 ]
 
 # hide data in view
-Hide(model_out2vtp, renderView1)
+Hide(model_outvtp, renderView1)
 
 # update the view to ensure updated data information
 renderView1.Update()
@@ -188,7 +202,7 @@ glyph1.ScaleFactor = 0.010486000031232835
 glyph1.GlyphTransform = "Transform2"
 
 # show data in view
-glyph1Display = Show(glyph1, renderView1, "GeometryRepresentation")
+glyph1Display = Show(glyph1, omniverseConnector1, "GeometryRepresentation")
 
 # trace defaults for the display properties.
 glyph1Display.Representation = "Surface"
@@ -259,7 +273,7 @@ ColorBy(glyph1Display, ("POINTS", field_vectors, "Magnitude"))
 glyph1Display.RescaleTransferFunctionToDataRange(True, False)
 
 # show color bar/color legend
-glyph1Display.SetScalarBarVisibility(renderView1, True)
+glyph1Display.SetScalarBarVisibility(omniverseConnector1, True)
 
 # get 2D transfer function for 'BfieldVectors'
 bfieldVectorsTF2D = GetTransferFunction2D("BfieldVectors")
@@ -301,22 +315,22 @@ bfieldVectorsPWF.ScalarRangeInitialized = 1
 Hide(calculator1, renderView1)
 
 # set active source
-SetActiveSource(model_out2vtp)
+SetActiveSource(model_outvtp)
 
 # show data in view
-model_out2vtpDisplay = Show(model_out2vtp, renderView1, "GeometryRepresentation")
+model_outvtpDisplay = Show(model_outvtp, omniverseConnector1, "GeometryRepresentation")
 
 # update the view to ensure updated data information
 renderView1.Update()
 
 # set scalar coloring
-ColorBy(model_out2vtpDisplay, ("CELLS", "Mass density Magnitude"))
+ColorBy(model_outvtpDisplay, ("CELLS", "Mass density Magnitude"))
 
 # rescale color and/or opacity maps used to include current data range
-model_out2vtpDisplay.RescaleTransferFunctionToDataRange(True, False)
+model_outvtpDisplay.RescaleTransferFunctionToDataRange(True, False)
 
 # show color bar/color legend
-model_out2vtpDisplay.SetScalarBarVisibility(renderView1, True)
+model_outvtpDisplay.SetScalarBarVisibility(omniverseConnector1, True)
 
 # get 2D transfer function for 'MassdensityMagnitude'
 massdensityMagnitudeTF2D = GetTransferFunction2D("MassdensityMagnitude")
@@ -355,6 +369,8 @@ SetActiveSource(glyph1)
 
 # get layout
 layout1 = GetLayout()
+# assign view to a particular cell in the layout
+AssignViewToLayout(view=omniverseConnector1, layout=layout1, hint=0)
 
 # --------------------------------
 # saving layout sizes for layouts
@@ -385,6 +401,7 @@ renderView1.ResetCamera()  # Reset the camera to view all data
 Render()  # Render the scene
 
 # --------------------------------------------
+
 if SCREENSHOT == True:
     # Set the output file path
     output_file_path = "output/image.png"  # You can change this to your desired output path and file name
@@ -392,7 +409,7 @@ if SCREENSHOT == True:
     # Save screenshot
     SaveScreenshot(
         output_file_path,
-        renderView1,
+        omniverseConnector1,
         ImageResolution=[1920, 1080],
         OverrideColorPalette="",
         StereoMode="No change",

@@ -4,11 +4,12 @@ Call SetLocale("en-us")
 CALL openDocument("???\BLDC12slot1layer4pole_success1.mn")
 Set Doc = getDocument()
 Set Sol= Doc.getSolution()
+SolType=Sol.getSolutionType()
 Fields= Doc.getFields()
 Dim arr_time
 arr_time = Array(1,1)
 
-Set mesh=Sol.getMesh(arr_time)
+Set mesh=Sol.getMesh(1)
 Set field=Sol.getSystemField(mesh, "B")
 Set field_B=Sol.getSystemField(mesh, "B")
 Set field_E=Sol.getSystemField(mesh, "E")
