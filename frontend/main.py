@@ -33,7 +33,7 @@ def main():
             print("magnet extraction done, parsing into paraview")
             calling_paraview.run_parser()
             print("paraview parsing done")
-            calling_paraview.run_displayer("E" if values["E"] else "B")
+            calling_paraview.run_displayer(field)
             print("display conversion done")
             break
         if event == 'Exit':

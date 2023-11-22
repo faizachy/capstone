@@ -7,6 +7,8 @@ from glob import glob
 from sys import argv
 import vtk
 
+scale_factor = 1000
+
 # Define a function to convert a value to an integer or a float, or leave it as is.
 def convert_value(e):
     try:
@@ -112,9 +114,9 @@ def main():
             fields = b_point_fields[pos[0]]
             f_x, f_y, f_z = 0, 0, 0
             for f in fields:
-                f_x += f[0]
-                f_y += f[1]
-                f_z += f[2]
+                f_x += f[0] * scale_factor
+                f_y += f[1] * scale_factor
+                f_z += f[2] * scale_factor
             # field_mag = sqrt(sum(x * x for x in (f_x, f_y, f_z)))
             # vtk_b_mag.InsertNextTuple1(field_mag)
             vtk_b.InsertNextTuple3(f_x, f_y, f_z)
@@ -147,9 +149,9 @@ def main():
             fields = e_point_fields.get(pos[0], [])  # Get E field values for the current node (if available)
             e_x, e_y, e_z = 0, 0, 0
             for f in fields:
-                e_x += f[0]
-                e_y += f[1]
-                e_z += f[2]
+                e_x += f[0] * scale_factor
+                e_y += f[1] * scale_factor
+                e_z += f[2] * scale_factor
             #field_mag = sqrt(sum(x * x for x in (e_x, e_y, e_z)))
             #vtk_e_mag.InsertNextTuple1(field_mag)
             vtk_e.InsertNextTuple3(e_x, e_y, e_z)
@@ -182,7 +184,7 @@ def main():
 
     # Create VTK triangle cells from the faces set.
     for pos in pos_vals:
-        vtk_points.InsertNextPoint(pos[1:])
+        vtk_points.InsertNextPoint([x * scale_factor for x in pos[1:]])
     for (face, mass) in faces.items():
         vtk_face = vtk.vtkTriangle()
         ids = vtk_face.GetPointIds()
