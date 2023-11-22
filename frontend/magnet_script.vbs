@@ -17,7 +17,7 @@ Else
     'Figure something out for this, maybe error handling code'
     arr_type = 1
 End If
-
+'test:
 If (mesh.is3DMesh()) Then
 
     Set mesh=Sol.getMesh(1)
