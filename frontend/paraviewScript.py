@@ -24,8 +24,6 @@ omniverseConnector1.BackEnd = 'OSPRay raycaster'
 omniverseConnector1.OSPRayMaterialLibrary = materialLibrary1
 
 
-SCREENSHOT = True
-
 # Variable to determine which field to display
 
 # Check if the required number of arguments is present (including the script name)
@@ -175,7 +173,7 @@ calculator1Display.OpacityTransferFunction.Points = [
 ]
 
 # hide data in view
-Hide(model_outvtp, renderView1)
+Hide(model_outvtp, omniverseConnector1)
 
 # update the view to ensure updated data information
 renderView1.Update()
@@ -261,7 +259,10 @@ glyph1.ScaleArray = ["POINTS", "normal"]
 renderView1.Update()
 
 # Properties modified on glyph1
-glyph1.ScaleFactor = 0.005243000015616417
+if field == "E":
+    glyph1.ScaleFactor = 15
+elif field == "B":
+    glyph1.ScaleFactor = 15
 
 # update the view to ensure updated data information
 renderView1.Update()
@@ -312,7 +313,7 @@ bfieldVectorsPWF.Points = [
 bfieldVectorsPWF.ScalarRangeInitialized = 1
 
 # hide data in view
-Hide(calculator1, renderView1)
+Hide(calculator1, omniverseConnector1)
 
 # set active source
 SetActiveSource(model_outvtp)
@@ -379,42 +380,4 @@ AssignViewToLayout(view=omniverseConnector1, layout=layout1, hint=0)
 layout1.SetSize(1800, 1134)
 
 # -----------------------------------
-# saving camera placements for views
-
-# current camera placement for renderView1
-renderView1.CameraPosition = [
-    -0.023961155911634377,
-    -0.0006015590877343993,
-    -0.18766203396447664,
-]
-renderView1.CameraFocalPoint = [0.0, 0.0, 0.037450000643730164]
-renderView1.CameraViewUp = [
-    -0.8208929610135638,
-    -0.564122637477454,
-    0.08888417431615632,
-]
-renderView1.CameraParallelScale = 0.1895805530295287
-
-# Render the scene
-renderView1.ViewSize = [1920, 1080]  # Set the resolution of the output window
-renderView1.ResetCamera()  # Reset the camera to view all data
-Render()  # Render the scene
-
-# --------------------------------------------
-
-if SCREENSHOT == True:
-    # Set the output file path
-    output_file_path = "output/image.png"  # You can change this to your desired output path and file name
-
-    # Save screenshot
-    SaveScreenshot(
-        output_file_path,
-        omniverseConnector1,
-        ImageResolution=[1920, 1080],
-        OverrideColorPalette="",
-        StereoMode="No change",
-        TransparentBackground=False,
-        CompressionLevel="5",
-    )  # Compression level is optional and for formats that support it like png
-
 RenderAllViews()

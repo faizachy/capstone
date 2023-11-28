@@ -1,7 +1,7 @@
 
 Call SetLocale("en-us")
 'DO NOT TOUCH THE ORDER OF LINE 4: because we are hard coding line 4
-CALL openDocument("C:\Users\tduran2\Desktop\Capstone\BLDC_Motors\Unscaled_motor_notWorking.mn")
+CALL openDocument("C:\Users\tduran2\Desktop\Capstone\BLDC_Motors\Scaled_MotorsolveBLDC_12slots4poles_WORKS.mn")
 Set Doc = getDocument()
 Set Sol= Doc.getSolution()
 SolType=Sol.getSolutionType()
@@ -18,6 +18,7 @@ Else
     arr_type = 1
 End If
 'test:
+
 Set mesh=Sol.getMesh(arr_type)
 If (mesh.is3DMesh()) Then
     Set field=Sol.getSystemField(mesh, "B")
