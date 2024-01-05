@@ -30,6 +30,8 @@ def check_if_file_solved(path):
     return None
 
 def save_file_to_cache(path):
+    if not os.path.exists(VTK_OUT):
+        return
     try:
         with open("file_cache.json", "wt") as f:
             file_num = file_cache[path][0] if path in file_cache else len(file_cache)
@@ -64,6 +66,7 @@ def main():
             field = "E" if values["E"] else "B"
             print(f"visualizing {field} field")
 
+            values["file"] = os.path.abspath(values["file"]);
             solved_path = check_if_file_solved(values["file"])
             if solved_path is not None:
                 print("using cached file result")
