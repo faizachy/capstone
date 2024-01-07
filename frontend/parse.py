@@ -1,15 +1,15 @@
 #!/usr/bin/env pvpython
-# The above line specifies the Python interpreter to use when running this script.
 
-#from paraview.simple import *
+# from paraview.simple import *
 from math import sqrt
 from glob import glob
 from sys import argv
 import vtk
 
+# we do a meter to milimeter conversion because magnet and paraview are using different units for lengths
 scale_factor = 1000
 
-# Define a function to convert a value to an integer or a float, or leave it as is.
+# Define a function to convert a value to an integer or a float, or leave it as is if it cannot be converted.
 def convert_value(e):
     try:
         return int(e)
@@ -19,7 +19,10 @@ def convert_value(e):
         except:
             return e
 
-# Define a function to parse data from a file and organize it into a dictionary.
+# opens a list of files, where each file name can be a glob, and from them builds a dictionary with the different values set by the csv files
+# corresponding to each type of data
+# we build this from multiple files because the field extractor can only extract one value at a time, and our csv extractor similarly extracts each value to seperate multiple files
+# duplicate information is overwritten without failing; this will happen normally with mesh connectivity or node coordinates from the regular magnet field extractor, but our script will not have duplicated values
 def get_file_data(filenames):
     res = {}
     filenames = set(sum((glob(x) for x in filenames), []))
@@ -32,7 +35,7 @@ def get_file_data(filenames):
         with open(filename, "r") as f:
             for ln in f:
                 elems = tuple(e.strip(" \n\t") for e in ln.split(",") if e.strip(" \n\t") != "")
-                if len(elems) == 1:
+                if len(elems) == 1: # single entry lines can only be headers describing what the following data will represent
                     if cur != None:
                         if types != None:
                             res[curproblem][cur] = (types, values)
@@ -44,7 +47,7 @@ def get_file_data(filenames):
                         cur = None
                     else:
                         cur = elems[0]
-                elif types == None:
+                elif types == None: # each csv section will have its first line describing what type of values are in each collumn for the section
                     types = elems
                 else:
                     values.append(tuple(convert_value(e) for e in elems)) # Note: node numbers are 1-indexed, so will need to offset
@@ -74,10 +77,12 @@ def main():
     if "Problem ID: 1" not in res:
         raise "Error: Files did not have a valid problem ID"
     # Extract mesh node coordinates, element connectivity, and B values from the parsed data.
+    # it is possible for these values to be excluded
     hasbfield = "B values for Entire model" in res["Problem ID: 1"]
     hasefield = "E values for Entire model" in res["Problem ID: 1"]
     hasmass = "Mass density values for Entire model" in res["Problem ID: 1"]
 
+    # these values should  be in every output ... will fail if they do not exist
     pos_type, pos_vals = res["Problem ID: 1"]["Mesh node coordinates for Entire model"]
     print(pos_type)
     fac_type, fac_vals = res["Problem ID: 1"]["Element mesh node connectivity for Entire model"]
@@ -174,10 +179,10 @@ def main():
     faces = {}
     for f_val in fac_vals:
         mass = face_masses[f_val[0] - 1] if hasmass else 5.0
-        if hasmass and mass < 5.0: # Don't add air to mesh
+        if hasmass and mass < 5.0: # Don't add air to mesh -- 5.0 is the mass density cutoff, with everything below it being air, and everything heavier being treated as something solid
             continue
-        f = tuple(sorted(f_val[1:]))
-        add_outside_face(faces, (f[0], f[1], f[2]), mass)
+        f = tuple(sorted(f_val[1:])) # we sort the node coordinates to ensure that face verticies always appear in the same order as they can be parts of different tetrahedrons
+        add_outside_face(faces, (f[0], f[1], f[2]), mass) # each mesh node is a tetrahedron, so we add each face of the tetrahedron
         add_outside_face(faces, (f[0], f[1], f[3]), mass)
         add_outside_face(faces, (f[0], f[2], f[3]), mass)
         add_outside_face(faces, (f[1], f[2], f[3]), mass)

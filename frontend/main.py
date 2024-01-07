@@ -14,6 +14,8 @@ VTK_OUT = 'output/model_out.vtp'
 
 file_cache = {}
 
+# check the file cache json file whether the given input file was solved previosly, and if so whether the input file has been modified since;
+# if no modifications have been found, the stored .vtk file can be used instead of recomputing the field extraction.
 def check_if_file_solved(path):
     try:
         with open("file_cache.json", "rt") as f:
@@ -29,6 +31,8 @@ def check_if_file_solved(path):
         print("caught error reading file_cache", e)
     return None
 
+# mark the input file as solved and add a cache entry for it; this will happen only if the solution was actually successful,
+# ie. the VTK output file to cache exists
 def save_file_to_cache(path):
     if not os.path.exists(VTK_OUT):
         return
@@ -42,6 +46,8 @@ def save_file_to_cache(path):
     except Exception as e:
         print("caught error writing file_cache", e)
 
+# main running script for the program;
+# creates a frontend enviornment handles calling the rest of files when input file is given
 def main():
     layout = [
         [sg.Text('Choose a solved .mn file', font=('Helvetica', 16))],
