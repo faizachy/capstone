@@ -19,4 +19,4 @@ def set_filename(filename):
 
 # runs magnet with the script input to run invisibly; the install location is based on the lab computers and could vary for other magnet set ups
 def run_script():
-    subprocess.call(["C:\\Program Files\\Siemens\\Simcenter MAGNET 2212.0002\\MagNet.exe", "-RunScriptInvisible=magnet_script_temp.vbs"])
+    subprocess.call(["C:\\Program Files\\Siemens\\Simcenter MAGNET 2212.0003\\MagNet.exe", "-RunScriptInvisible=magnet_script_temp.vbs"])
