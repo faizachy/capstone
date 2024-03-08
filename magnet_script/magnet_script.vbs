@@ -1,9 +1,15 @@
-
+'sets the locale to English (United States)
 Call SetLocale("en-us")
-'DO NOT TOUCH THE ORDER OF LINE 4: because we are hard coding line 4
+'DO NOT TOUCH THE ORDER OF LINE 5: because line 5 was hard coded
+'opens a document or file for further processing
 CALL openDocument("C:\Users\fchu6\Desktop\BLDC12slot1layer4pole_success1.mn")
+'sets the variable Doc to the document object returned by the function getDocument(); used to retrieve the document that
+'was opened in line 5
 Set Doc = getDocument()
+'assigns the solution type obtained from the Sol object to the variable SolType; might be used to determine the type of
+'solution data and how to process it further
 Set Sol= Doc.getSolution()
+'retrieves the fields from the document (Doc) and stores them in the variable Fields
 Fields= Doc.getFields()
 Set mesh=Sol.getMesh(1)
 Set field=Sol.getSystemField(mesh, "B")
