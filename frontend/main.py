@@ -69,18 +69,27 @@ def main():
                 print("no file specified")
                 continue
 
+            # determine if electric field or magnetic field wanted 
+
             field = "E" if values["E"] else "B"
             print(f"visualizing {field} field")
 
             values["file"] = os.path.abspath(values["file"]);
             solved_path = check_if_file_solved(values["file"])
+
+            # create an output file model_out.vtp
+
             if solved_path is not None:
                 print("using cached file result")
                 shutil.copy(solved_path, VTK_OUT)
             else:
+
+                # not found in cache
+
                 print("extracting magnet solutions")
                 magnet.set_filename(values["file"])
                 magnet.run_script()
+
                 print("magnet extraction done, parsing into paraview")
                 calling_paraview.run_parser()
                 print("paraview parsing done, saving file to cache")
