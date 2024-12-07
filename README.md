@@ -55,13 +55,22 @@ Display the VTK file in ParaView. This file can be generated from `Trace` functi
 
 Python script used to parse the csv files and creates a VTK file that encompasses all the information of the CSV files.
 
-## degreeScript.vbs
+## degreeScript.vbs - BLDC Motor Script
 
 Simulates the rotation of a BLDC motor across 360 degrees by:
 
 Selecting and rotating components of the motor model.
 Solving static electromagnetic simulations for each degree.
 Saving results as .mn files for further processing.
+
+## fullScript.vbs -  Stepper Motor Script
+This script controls a 3-pole stepper motor by iteratively adjusting coil currents and rotating the rotor through 90 degrees. It uses Siemens software for simulation and saves the results as .mn files.
+
+### Stepper Motor Output Files
+
+The output files from the stepper motor simulation are available for download in:
+https://github.com/faizachy/capstone/releases/tag/v1.0.0
+
 
 ## Output
 
